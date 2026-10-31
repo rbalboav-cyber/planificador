@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E8EBF0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#151821" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Planificador">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<title>Planificador de canales</title>
+<style>
+:root{
+  --bg:#E8EBF0; --panel:#FFFFFF; --sunk:#F2F4F7; --line:#D5DAE2; --ink:#161A22; --soft:#5D6675; --faint:#98A0AD;
+  --ok:#1C9A68; --warn:#C98B00; --late:#D63C26;
+  --ok-bg:#DFF3EA; --warn-bg:#FBF0D3; --late-bg:#FBE3DE;
+  --now:#D63C26; --act:#161A22; --act-ink:#FFFFFF;
+  --r-lg:22px; --r-md:14px; --r-sm:9px;
+  --f:"Bricolage Grotesque",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#151821; --panel:#1E222D; --sunk:#262B37; --line:#323847; --ink:#EEF0F4; --soft:#A3ABBA; --faint:#6E7686;
+    --ok:#3CC48C; --warn:#E8B230; --late:#F06A54;
+    --ok-bg:rgba(60,196,140,.14); --warn-bg:rgba(232,178,48,.14); --late-bg:rgba(240,106,84,.15);
+    --now:#F06A54; --act:#EEF0F4; --act-ink:#151821;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.45;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 84px) env(safe-area-inset-left)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none;padding:0}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:6px}
+.wrap{max-width:720px;margin:0 auto;padding:18px 16px 8px}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.02em}
+
+/* ---------- top ---------- */
+.top{display:flex;align-items:flex-start;gap:12px;margin:6px 0 18px}
+.top .grow{flex:1;min-width:0}
+.date{color:var(--soft);font-size:14px}
+.headline{font-size:30px;line-height:1.08;font-weight:800;letter-spacing:-.035em;margin-top:4px}
+.headline.late{color:var(--late)} .headline.ok{color:var(--ok)}
+.round{width:44px;height:44px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.round svg{width:20px;height:20px}
+
+/* ---------- parrilla ---------- */
+.grid{background:var(--panel);border-radius:var(--r-lg);padding:14px 12px 10px;margin-bottom:22px;border:1px solid var(--line)}
+.g-row{display:grid;grid-template-columns:92px repeat(var(--n),1fr);gap:3px;align-items:stretch}
+.g-head{margin-bottom:6px}
+.g-head span{font-size:11px;color:var(--faint);text-align:center;line-height:1.1}
+.g-head span b{display:block;font-size:13px;color:var(--soft);font-weight:600}
+.g-head span.today b{color:var(--ink)}
+.g-ch{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;line-height:1.1;padding-right:6px;min-width:0;text-align:left}
+.g-ch i{width:4px;align-self:stretch;border-radius:2px;flex:none}
+.g-ch span{overflow:hidden;hyphens:auto;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.g-line{padding:5px 0;border-top:1px solid var(--line)}
+.g-line:first-of-type{border-top:none}
+.g-cell{position:relative;display:flex;gap:2px;height:30px;padding:3px;background:var(--sunk);border-radius:7px}
+.g-cell.none{background:transparent}
+.tick{flex:1;border-radius:3px;min-width:2px}
+.tick.f{background:var(--c)}
+.tick.e{background:transparent;box-shadow:inset 0 0 0 1.5px var(--faint);opacity:.55}
+.tick.p{background:var(--c);opacity:.28}
+.tick.m{background:transparent;box-shadow:inset 0 0 0 1px var(--faint);opacity:.3}
+.nowl{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--now);border-radius:1px;z-index:1}
+.g-foot{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--soft);margin-top:10px;padding-left:2px}
+.g-foot span{display:inline-flex;align-items:center;gap:6px}
+.k{width:12px;height:12px;border-radius:3px;display:inline-block}
+.k.f{background:var(--soft)} .k.e{box-shadow:inset 0 0 0 1.5px var(--faint)} .k.n{width:2px;background:var(--now)}
+
+/* ---------- lista de margen ---------- */
+.list-h{display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 10px}
+.list-h h2{font-size:19px}
+.list-h span{font-size:13px;color:var(--soft)}
+.filters{display:flex;gap:6px;margin:0 0 12px;overflow-x:auto;scrollbar-width:none}
+.fl{padding:7px 13px;border-radius:999px;font-size:14px;border:1px solid var(--line);background:var(--panel);white-space:nowrap}
+.fl.on{background:var(--act);color:var(--act-ink);border-color:var(--act)}
+.rows{background:var(--panel);border-radius:var(--r-lg);border:1px solid var(--line);overflow:hidden}
+.ch{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 14px 14px 0;border-top:1px solid var(--line)}
+.ch:first-child{border-top:none}
+.ch .bar{width:5px;height:100%;min-height:52px;border-radius:0 4px 4px 0}
+.ch .body{min-width:0;text-align:left}
+.ch .nm{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch .meta{font-size:13px;color:var(--soft);margin-top:1px}
+.ch .meta b{font-weight:600;color:var(--ink)}
+.ch .side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.margin{text-align:right;font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.margin small{font-size:12px;font-weight:500;letter-spacing:0;color:var(--soft);display:block;text-align:right;margin-top:2px}
+.margin.ok{color:var(--ok)} .margin.warn{color:var(--warn)} .margin.late{color:var(--late)} .margin.none{color:var(--faint)}
+.quick{font-size:13px;font-weight:600;padding:6px 11px;border-radius:999px;background:var(--sunk);border:1px solid var(--line)}
+.plat{font-size:12px;font-weight:600;color:var(--soft)}
+
+/* ---------- detalle ---------- */
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--soft);font-size:15px;margin:2px 0 12px}
+.hero{border-radius:var(--r-lg);padding:18px 18px 16px;margin-bottom:16px;background:var(--panel);border:1px solid var(--line);position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c)}
+.hero .row1{display:flex;align-items:center;gap:10px}
+.hero h1{font-size:26px;flex:1;min-width:0;line-height:1.1}
+.hero .big{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:14px}
+.hero .big.ok{color:var(--ok)} .hero .big.warn{color:var(--warn)} .hero .big.late{color:var(--late)} .hero .big.none{color:var(--faint)}
+.hero .cap{font-size:14px;color:var(--soft);margin-top:4px}
+.hero .cap b{color:var(--ink);font-weight:600}
+.hint{font-size:14px;color:var(--soft);margin:0 4px 12px}
+.days{background:var(--panel);border-radius:var(--r-lg);border:1px solid var(--line);overflow:hidden}
+.day{display:grid;grid-template-columns:84px 1fr;gap:10px;padding:13px 14px;border-top:1px solid var(--line)}
+.day:first-child{border-top:none}
+.day .dl{line-height:1.15}
+.day .dl b{display:block;font-size:15px;text-transform:capitalize}
+.day .dl span{font-size:12px;color:var(--soft)}
+.day .dl .all{white-space:nowrap;margin-top:8px;font-size:12px;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.slots{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.slot{border-radius:var(--r-sm);padding:7px 10px 6px;font-size:15px;font-weight:600;display:flex;flex-direction:column;align-items:flex-start;min-width:76px;text-align:left;line-height:1.15;box-shadow:inset 0 0 0 1.5px var(--line);background:transparent}
+.slot small{font-size:11px;font-weight:500;color:var(--soft);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.slot.f{background:var(--c);color:#fff;box-shadow:none}
+.slot.f small{color:rgba(255,255,255,.85)}
+.slot.p{background:var(--sunk);box-shadow:none;color:var(--soft)}
+.slot.m{box-shadow:inset 0 0 0 1.5px var(--line);color:var(--faint);border-style:dashed}
+.slot.m small{color:var(--faint)}
+.slot.pop{animation:pop .22s ease-out}
+@keyframes pop{0%{transform:scale(.92)}100%{transform:scale(1)}}
+
+/* ---------- pendientes ---------- */
+.ph{font-size:30px;font-weight:800;letter-spacing:-.035em;line-height:1.08}
+.sec{font-size:14px;font-weight:700;color:var(--soft);margin:20px 4px 8px}
+.pend{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px 14px 12px 0;border-top:1px solid var(--line);width:100%;text-align:left}
+.pend:first-child{border-top:none}
+.pend .bar{width:5px;height:38px;border-radius:0 4px 4px 0}
+.pend .t{font-size:20px;font-weight:700}
+.pend .t.late{color:var(--late)} .pend .t.warn{color:var(--warn)}
+.check{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;color:var(--faint)}
+.check svg{width:16px;height:16px}
+
+/* ---------- formularios ---------- */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--soft);margin:0 2px 6px}
+.inp{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:16px}
+.help{font-size:13px;color:var(--soft);margin:-6px 2px 14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rule{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:12px;margin-bottom:10px}
+.rule .rr{display:flex;gap:8px}
+.dows{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:10px 0}
+.dow{border-radius:9px;padding:8px 0;font-size:14px;font-weight:600;background:var(--sunk);color:var(--soft)}
+.dow.on{background:var(--act);color:var(--act-ink)}
+.btn{display:block;width:100%;border-radius:14px;padding:14px;font-weight:700;font-size:16px;background:var(--act);color:var(--act-ink);text-align:center}
+.btn.alt{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+.btn.del{background:var(--late-bg);color:var(--late)}
+.btn+.btn{margin-top:10px}
+.x{width:44px;flex:none;border-radius:12px;background:var(--sunk);color:var(--soft);font-size:18px}
+.colors{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:34px;height:34px;border-radius:50%}
+.sw.on{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--ink)}
+.set-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:13px 14px 13px 0;border-top:1px solid var(--line);width:100%;text-align:left}
+.set-row:first-child{border-top:none}
+.set-row .bar{width:5px;height:36px;border-radius:0 4px 4px 0}
+.set-row b{display:block;font-size:16px}
+.set-row span{font-size:13px;color:var(--soft)}
+.chev{color:var(--faint);font-size:20px}
+.block{background:var(--panel);border-radius:var(--r-lg);border:1px solid var(--line);overflow:hidden;margin-bottom:12px}
+.pad{padding:14px}
+.sh{font-size:19px;margin:24px 4px 10px}
+
+/* ---------- hojas ---------- */
+.sheet-bg{position:fixed;inset:0;background:rgba(10,12,18,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20;animation:fade .15s}
+.sheet{background:var(--bg);border-radius:24px 24px 0 0;padding:20px 16px calc(18px + env(safe-area-inset-bottom));width:100%;max-width:720px;animation:up .2s ease-out}
+.sheet h3{font-size:22px}
+.sheet .sub{color:var(--soft);font-size:14px;margin:2px 0 16px}
+textarea.inp{min-height:150px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--act);color:var(--act-ink);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:30;white-space:nowrap}
+.toast.undo{display:flex;align-items:center;gap:14px;padding:8px 8px 8px 16px}
+.toast.undo button{background:color-mix(in srgb,var(--act-ink) 18%,transparent);color:var(--act-ink);font-weight:700;padding:7px 12px;border-radius:9px}
+.empty{padding:36px 20px;text-align:center;color:var(--soft)}
+.empty b{display:block;color:var(--ink);font-size:20px;margin-bottom:4px}
+
+/* ---------- nav ---------- */
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));display:flex;gap:4px;padding:5px;background:var(--act);border-radius:999px;box-shadow:0 8px 28px rgba(10,12,18,.25);z-index:10}
+nav.tabs button{white-space:nowrap;display:flex;align-items:center;gap:7px;padding:10px 14px;border-radius:999px;color:var(--act-ink);opacity:.6;font-size:14px;font-weight:600}
+nav.tabs button svg{width:19px;height:19px}
+nav.tabs button.on{opacity:1;background:color-mix(in srgb,var(--act-ink) 16%,transparent)}
+nav.tabs .badge{min-width:19px;height:19px;border-radius:10px;background:var(--late);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 5px}
+
+/* ---------- estadísticas ---------- */
+.totals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.totals div{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:12px}
+.totals b{display:block;font-size:20px;white-space:nowrap;font-weight:800;letter-spacing:-.03em}
+.totals b.muted{color:var(--faint)}
+.totals span{font-size:12px;color:var(--soft);line-height:1.2;display:block;margin-top:2px}
+.sc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);margin-bottom:12px;overflow:hidden}
+.sc-h{display:flex;align-items:center;gap:10px;padding:14px 14px 0 0}
+.sc-h .bar{width:5px;height:24px;border-radius:0 4px 4px 0}
+.sc-h b{font-size:18px;flex:1}
+.sc-b{padding:12px 14px 14px}
+.kpis{display:grid;grid-template-columns:1.2fr 1.2fr .8fr;gap:10px}
+.kpis b{display:block;font-size:28px;font-weight:800;letter-spacing:-.035em;line-height:1.05}
+.kpis span{display:block;font-size:12px;color:var(--soft)}
+.kpis .dl{font-size:12px;font-weight:600;margin-top:4px;color:var(--soft)}
+.kpis .dl.up{color:var(--ok)} .kpis .dl.down{color:var(--late)} .kpis .dl.none{color:var(--faint);font-weight:500}
+.spark{width:100%;height:56px;display:block;margin-top:14px}
+.spark-cap{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);margin-top:4px}
+.spark-empty{margin-top:14px;padding:12px;border-radius:var(--r-sm);background:var(--sunk);font-size:13px;color:var(--soft)}
+.vids{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.vh{font-size:13px;font-weight:700;color:var(--soft);margin-bottom:4px}
+.vid{display:grid;grid-template-columns:1fr auto;gap:0 10px;padding:7px 0;color:inherit;text-decoration:none;border-top:1px solid var(--sunk)}
+.vid:first-of-type{border-top:none}
+.vt{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vm{font-size:12px;color:var(--soft);grid-row:2}
+.vv{grid-row:1/3;grid-column:2;align-self:center;font-weight:700;font-size:15px}
+.setup h3{font-size:20px;margin-bottom:6px}
+.setup p{margin:0 0 8px;color:var(--soft);font-size:14px}
+.setup ol{margin:0;padding-left:20px;font-size:14px;line-height:1.55}
+.setup li{margin-bottom:4px}
+.err{background:var(--late-bg);color:var(--late);border-radius:var(--r-md);padding:12px 14px;font-size:14px;margin-bottom:12px;font-weight:600}
+.spin svg{animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+nav.tabs button .lb{display:none}
+nav.tabs button.on .lb{display:inline}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<nav class="tabs" aria-label="Secciones">
+  <button data-go="" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 4v16"/></svg><span class="lb">Parrilla</span></button>
+  <button data-go="semana" id="tab-week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lb">Por cubrir</span><span class="badge" id="badge" hidden></span></button>
+  <button data-go="stats" id="tab-stats" aria-label="Estadísticas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="lb">Estadísticas</span></button>
+  <button data-go="ajustes" id="tab-set" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+</nav>
+<script>
+(function(){
+"use strict";
+const KEY='planificador-canales-v1';
+const PLAT={youtube:'YouTube',tiktok:'TikTok',instagram:'Instagram'};
+const COLORS=['#3B6CF6','#8B5CF6','#0E9F9A','#E0447C','#E07A1F','#5B6B8C','#2F9BD6','#A0522D','#6D4AE0','#B03A9E'];
+const OLD={'#f59e0b':'#E07A1F','#7c8cff':'#3B6CF6','#ef4444':'#8B5CF6','#22c55e':'#0E9F9A'};
+const DOW=['L','M','X','J','V','S','D'], DOWJS=[1,2,3,4,5,6,0], ALL=[0,1,2,3,4,5,6];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const I_CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const I_PLUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const I_EDIT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>';
+
+const DEFAULT={version:1,settings:{horizon:7},channels:[
+  {id:'animal-chaos',name:'Animal Chaos',platform:'youtube',yt:'@failanimalschaos',ytId:'UClJ1dDDy84FQAvU0A9EZoAQ',color:'#E07A1F',buffer:2,slots:[{id:'a1',format:'Short',days:ALL,times:['02:00','06:00','10:00','14:00','18:00','22:00']}]},
+  {id:'cosmo-counts',name:'Cosmo Counts',platform:'youtube',yt:'@CosmoCounts',color:'#3B6CF6',buffer:2,slots:[{id:'c1',format:'Short',days:ALL,times:['06:00','18:00']}]},
+  {id:'expediente-planeta',name:'Expediente Planeta',platform:'youtube',yt:'@ExpedientePlaneta',color:'#8B5CF6',buffer:2,slots:[{id:'e1',format:'Short',days:ALL,times:['20:00']},{id:'e2',format:'Largo',days:[1],times:['20:00']}]},
+  {id:'modo-supervivencia',name:'Modo Supervivencia',platform:'youtube',yt:'@ModSupervivencia',color:'#0E9F9A',buffer:2,slots:[{id:'m1',format:'Short',days:ALL,times:['21:30']}]},
+  {id:'trabajo-en-pixeles',name:'Trabajo en Píxeles',platform:'youtube',yt:'@trabajoenpixeles',color:'#E0447C',buffer:2,slots:[{id:'t1',format:'Short',days:ALL,times:['13:30']}]},
+  {id:'debajo-del-oceano',name:'Debajo del Océano',platform:'youtube',yt:'@debajodeloceano',color:'#2F9BD6',buffer:2,slots:[{id:'d1',format:'Largo',days:[1],times:['18:00']}]}
+],posts:{},stats:{'animal-chaos':{subs:5910,views:9056748,videos:241,snaps:[{d:'2026-10-31',subs:5910,views:9056748,videos:241}]}}};
+
+let S;
+function load(){
+  try{const raw=localStorage.getItem(KEY);S=raw?JSON.parse(raw):null}catch(e){S=null}
+  if(!S||!Array.isArray(S.channels)) S=JSON.parse(JSON.stringify(DEFAULT));
+  S.posts=S.posts||{};S.settings=S.settings||{horizon:7};S.stats=S.stats||{};
+  const ac=S.channels.find(c=>c.id==='animal-chaos');if(ac&&!ac.yt&&!ac.ytId){ac.yt='@failanimalschaos';ac.ytId='UClJ1dDDy84FQAvU0A9EZoAQ'}
+  if(!(S.migr>=2)){
+    const H={'cosmo-counts':'@CosmoCounts','expediente-planeta':'@ExpedientePlaneta','modo-supervivencia':'@ModSupervivencia'};
+    S.channels.forEach(c=>{if(H[c.id]&&!c.yt){c.yt=H[c.id];delete c.ytId}});
+    ['trabajo-en-pixeles','debajo-del-oceano'].forEach(id=>{if(!S.channels.some(c=>c.id===id)) S.channels.push(JSON.parse(JSON.stringify(DEFAULT.channels.find(c=>c.id===id))))});
+    S.migr=2;
+  }
+  if(S.migr<3){
+    for(const id of ['trabajo-en-pixeles','debajo-del-oceano']){
+      const c=S.channels.find(x=>x.id===id);
+      if(c&&c.slots.length===1&&c.slots[0].id===(id[0]+'1')&&c.slots[0].times.join()==='18:00'&&c.slots[0].format==='Short') c.slots=JSON.parse(JSON.stringify(DEFAULT.channels.find(x=>x.id===id).slots));
+    }
+    S.migr=3;
+  }
+  if(S.migr<4){S.posts={};S.migr=4}
+  if(ac&&!S.stats[ac.id]) S.stats[ac.id]=JSON.parse(JSON.stringify(DEFAULT.stats['animal-chaos']));
+  S.channels.forEach(c=>{if(OLD[c.color]) c.color=OLD[c.color]});
+  const lim=dkey(addDays(today(),-21));
+  for(const c in S.posts) for(const k in S.posts[c]) if(k.slice(0,10)<lim) delete S.posts[c][k];
+  save();
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+// ---------- fechas ----------
+function today(){const d=new Date();d.setHours(0,0,0,0);return d}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+const pad=n=>String(n).padStart(2,'0');
+const dkey=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+function at(d,t){const [h,m]=t.split(':').map(Number);const x=new Date(d);x.setHours(h||0,m||0,0,0);return x}
+const cap1=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const fmtLong=d=>cap1(d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}));
+const wd=d=>d.toLocaleDateString('es-ES',{weekday:'short'}).replace('.','');
+const hm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+function dayName(i,d){return i===0?'Hoy':i===1?'Mañana':wd(d)+' '+d.getDate()}
+function whenTxt(d){const i=Math.round((new Date(d).setHours(0,0,0,0)-today())/864e5);return (i===0?'hoy':i===1?'mañana':wd(d)+' '+d.getDate())+' a las '+hm(d)}
+function dur(ms){
+  const h=ms/36e5;
+  if(h<1) return Math.max(1,Math.round(ms/6e4))+' min';
+  if(h<24) return Math.floor(h)+' h';
+  const d=Math.floor(h/24),r=Math.floor(h%24);
+  return d+' d'+(r?' '+r+' h':'');
+}
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ---------- huecos y estado ----------
+function slotsFor(ch,from,days){
+  const out=[];
+  for(let i=0;i<days;i++){
+    const d=addDays(from,i),dow=d.getDay();
+    for(const r of ch.slots){
+      if(!r.days.includes(dow)) continue;
+      for(const t of r.times){
+        const key=dkey(d)+'_'+t+'_'+r.format;
+        out.push({key,when:at(d,t),day:i,date:d,time:t,format:r.format,post:(S.posts[ch.id]||{})[key]});
+      }
+    }
+  }
+  return out.sort((a,b)=>a.when-b.when||a.format.localeCompare(b.format));
+}
+function status(ch){
+  const H=S.settings.horizon||7,now=new Date();
+  const all=slotsFor(ch,today(),H),fut=all.filter(s=>s.when>now);
+  const firstEmpty=fut.find(s=>!s.post)||null;
+  const filled=fut.filter(s=>s.post).length;
+  let lvl,big,cap;
+  if(!fut.length){lvl='none';big='—';cap='Sin publicaciones en estos días'}
+  else if(!firstEmpty){lvl='ok';big=H+' d';cap='Todo cubierto los próximos '+H+' días'}
+  else{
+    const ms=firstEmpty.when-now,h=ms/36e5;
+    lvl=h<24?'late':h<(ch.buffer||2)*24?'warn':'ok';
+    big=dur(ms);cap='Siguiente hueco '+whenTxt(firstEmpty.when);
+  }
+  return {lvl,big,cap,all,fut,filled,firstEmpty};
+}
+function freq(ch){let n=0;for(const r of ch.slots) n+=r.times.length*r.days.length;const d=n/7;return d>=1?(Math.round(d*10)/10).toString().replace('.',',')+' al día':n+' a la semana'}
+function mark(ch,key){S.posts[ch.id]=S.posts[ch.id]||{};S.posts[ch.id][key]={title:''};save()}
+
+// ---------- rutas ----------
+const route=()=>(location.hash||'').slice(1);
+function go(h){if(route()===h) render(); else location.hash=h}
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.go));
+let filter='all',flash=null;
+const app=document.getElementById('app');
+
+function render(){
+  const r=route();
+  document.getElementById('tab-home').classList.toggle('on',r===''||r.startsWith('canal-'));
+  document.getElementById('tab-week').classList.toggle('on',r==='semana');
+  document.getElementById('tab-stats').classList.toggle('on',r==='stats');
+  document.getElementById('tab-set').classList.toggle('on',r==='ajustes'||r.startsWith('editar-')||r==='nuevo');
+  const late=S.channels.filter(c=>status(c).lvl==='late').length;
+  const bd=document.getElementById('badge');bd.hidden=!late;bd.textContent=late;
+  if(r.startsWith('canal-')) return renderChannel(r.slice(6));
+  if(r==='semana') return renderPending();
+  if(r==='stats'){renderStats();refreshAll(false);return}
+  if(r==='ajustes') return renderSettings();
+  if(r==='nuevo') return renderEdit(null);
+  if(r.startsWith('editar-')) return renderEdit(r.slice(7));
+  renderHome();
+}
+
+// ---------- parrilla ----------
+function renderHome(){
+  const H=S.settings.horizon||7,now=new Date(),t0=today();
+  const plats=[...new Set(S.channels.map(c=>c.platform))];
+  if(!plats.includes(filter)) filter='all';
+  const chans=S.channels.filter(c=>filter==='all'||c.platform===filter);
+  const sts=new Map(S.channels.map(c=>[c,status(c)]));
+  const late=S.channels.filter(c=>sts.get(c).lvl==='late');
+  const warn=S.channels.filter(c=>sts.get(c).lvl==='warn');
+  let head,hc='';
+  if(!S.channels.length){head='Añade tu primer canal'}
+  else if(late.length){hc='late';head=late.length===1?late[0].name+' se queda sin vídeos hoy':late.length+' canales se quedan sin vídeos hoy'}
+  else if(warn.length){head=warn.length===1?'A '+warn[0].name+' le queda poco':warn.length+' canales con poco margen'}
+  else{hc='ok';head='Todo cubierto'}
+
+  const nowFrac=(now-t0)/864e5;
+  let g=`<div class="g-row g-head"><span></span>${Array.from({length:H},(_,i)=>{const d=addDays(t0,i);return `<span class="${i===0?'today':''}">${esc(i===0?'hoy':wd(d))}<b>${d.getDate()}</b></span>`}).join('')}</div>`;
+  for(const c of chans){
+    const s=sts.get(c);
+    g+=`<div class="g-row g-line" style="--c:${esc(c.color)}"><button class="g-ch" data-ch="${esc(c.id)}"><i style="background:${esc(c.color)}"></i><span>${esc(c.name)}</span></button>`;
+    for(let i=0;i<H;i++){
+      const ds=s.all.filter(x=>x.day===i);
+      g+=`<div class="g-cell ${ds.length?'':'none'}">`+ds.map(x=>{
+        const past=x.when<=now;const k=x.post?(past?'p':'f'):(past?'m':'e');return `<span class="tick ${k}"></span>`}).join('')+
+        (i===0?`<span class="nowl" style="left:calc(${(nowFrac*100).toFixed(1)}% - 1px)"></span>`:'')+`</div>`;
+    }
+    g+=`</div>`;
+  }
+
+  let rows='';
+  for(const c of chans){
+    const s=sts.get(c);
+    rows+=`<div class="ch"><span class="bar" style="background:${esc(c.color)}"></span>
+      <button class="body" data-ch="${esc(c.id)}"><div class="nm">${esc(c.name)}</div>
+      <div class="meta">${esc(s.cap)}</div>
+      <div class="meta"><span class="plat">${PLAT[c.platform]}</span> · ${s.filled} de ${s.fut.length} listos · ${freq(c)}</div></button>
+      <div class="side"><div class="margin ${s.lvl}">${esc(s.big)}<small>${s.lvl==='none'?'':'de margen'}</small></div>
+      ${s.firstEmpty?`<button class="quick" data-q="${esc(c.id)}">Marcar ${esc(hm(s.firstEmpty.when))}</button>`:''}</div></div>`;
+  }
+
+  app.innerHTML=`<div class="top"><div class="grow"><div class="date">${esc(fmtLong(now))}</div><h1 class="headline ${hc}">${esc(head)}</h1></div>
+    <button class="round" id="add" aria-label="Añadir canal">${I_PLUS}</button></div>
+    ${plats.length>1?`<div class="filters"><button class="fl ${filter==='all'?'on':''}" data-f="all">Todos</button>${plats.map(p=>`<button class="fl ${filter===p?'on':''}" data-f="${p}">${PLAT[p]}</button>`).join('')}</div>`:''}
+    ${chans.length?`<div class="grid" style="--n:${H}">${g}<div class="g-foot"><span><i class="k f"></i>Programado</span><span><i class="k e"></i>Hueco libre</span><span><i class="k n"></i>Ahora</span></div></div>
+    <div class="list-h"><h2>Margen por canal</h2><span>hasta el próximo hueco</span></div><div class="rows">${rows}</div>`
+    :`<div class="rows empty"><b>Sin canales todavía</b>Pulsa + para añadir el primero con su horario.</div>`}`;
+  app.querySelector('#add').onclick=()=>go('nuevo');
+  app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()});
+  app.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>go('canal-'+b.dataset.ch));
+  app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{
+    const c=S.channels.find(x=>x.id===b.dataset.q),s=sts.get(c);
+    const u=snap();mark(c,s.firstEmpty.key);undoToast(c.name+' · '+hm(s.firstEmpty.when)+' marcado',u);render();
+  });
+}
+
+// ---------- canal ----------
+function renderChannel(id){
+  const c=S.channels.find(x=>x.id===id);if(!c) return go('');
+  const H=S.settings.horizon||7,s=status(c),now=new Date();
+  let days='';
+  for(let i=0;i<H;i++){
+    const d=addDays(today(),i),ds=s.all.filter(x=>x.day===i);
+    if(!ds.length) continue;
+    const pend=ds.filter(x=>!x.post&&x.when>now).length;
+    days+=`<div class="day"><div class="dl"><b>${esc(dayName(i,d))}</b><span>${i<2?esc(wd(d)+' '+d.getDate()):esc(d.toLocaleDateString('es-ES',{month:'short'}).replace('.',''))}</span>
+      ${pend>1?`<button class="all" data-fill="${i}">Marcar todo</button>`:''}</div><div class="slots">`+
+      ds.map(x=>{
+        const past=x.when<=now;
+        const k=x.post?(past?'p':'f'):(past?'m':'');
+        const lbl=x.post?(x.post.title||(past?'Publicado':x.format)):(past?'Sin marcar':x.format);
+        return `<button class="slot ${k} ${flash===x.key?'pop':''}" data-k="${esc(x.key)}" aria-label="${esc(x.time+' '+x.format)}">${esc(x.time)}<small>${esc(lbl)}</small></button>`;
+      }).join('')+`</div></div>`;
+  }
+  flash=null;
+  app.innerHTML=`<button class="back" id="bk">‹ Parrilla</button>
+  <div class="hero" style="--c:${esc(c.color)}"><div class="row1"><h1>${esc(c.name)}</h1><button class="round" id="ed" aria-label="Editar canal">${I_EDIT}</button></div>
+    <div class="big ${s.lvl}">${esc(s.big)}</div>
+    <div class="cap">${s.lvl==='none'?'':'de margen · '}${esc(s.cap)}</div>
+    <div class="cap">${PLAT[c.platform]} · ${freq(c)} · ${s.filled} de ${s.fut.length} listos</div></div>
+  <p class="hint">Toca una hora para marcarla como programada. Si ya está marcada, puedes ponerle título o quitarla.</p>
+  <div class="days" style="--c:${esc(c.color)}">${days||'<div class="empty"><b>Sin horario</b>Edita el canal para añadir días y horas.</div>'}</div>`;
+  app.querySelector('#bk').onclick=()=>go('');
+  app.querySelector('#ed').onclick=()=>go('editar-'+c.id);
+  app.querySelectorAll('[data-fill]').forEach(b=>b.onclick=()=>{
+    const u=snap(),i=+b.dataset.fill,xs=s.all.filter(x=>x.day===i&&!x.post&&x.when>now);xs.forEach(x=>mark(c,x.key));undoToast(xs.length+' huecos marcados',u);render();
+  });
+  app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.k;
+    if(!(S.posts[c.id]||{})[k]){const u=snap();mark(c,k);flash=k;undoToast(k.split('_')[1]+' marcado',u);render();return}
+    slotSheet(c,k);
+  });
+}
+function slotSheet(c,k){
+  const p=S.posts[c.id][k],[d,t,f]=k.split('_');
+  const bg=sheet(`<h3>${esc(t)} · ${esc(f)}</h3><div class="sub">${esc(c.name)} · ${esc(fmtLong(new Date(d+'T00:00')))}</div>
+    <div class="field"><label for="tt">Título o nota</label><input class="inp" id="tt" value="${esc(p.title)}" placeholder="Ej.: Top 5 perros rescatados"></div>
+    <div class="two"><button class="btn del" id="rm">Quitar</button><button class="btn" id="ok">Guardar</button></div>`);
+  bg.querySelector('#rm').onclick=()=>{const u=snap();delete S.posts[c.id][k];save();bg.remove();undoToast(t+' desmarcado',u);render()};
+  bg.querySelector('#ok').onclick=()=>{p.title=bg.querySelector('#tt').value.trim();save();bg.remove();render()};
+}
+
+// ---------- por cubrir ----------
+function renderPending(){
+  const now=new Date(),H=S.settings.horizon||7,items=[];
+  for(const c of S.channels) for(const x of slotsFor(c,today(),H)) if(!x.post&&x.when>now) items.push({c,x});
+  items.sort((a,b)=>a.x.when-b.x.when);
+  const in24=items.filter(i=>i.x.when-now<864e5).length;
+  let h=`<div class="top"><div class="grow"><div class="date">Próximos ${H} días</div><h1 class="ph">${items.length?items.length+' huecos por cubrir':'Nada por cubrir'}</h1>
+    ${in24?`<div class="date" style="color:var(--late);text-transform:none;margin-top:4px">${in24} en las próximas 24 h</div>`:''}</div></div>`;
+  if(!items.length) h+=`<div class="rows empty"><b>Todo programado</b>Cuando un canal tenga huecos libres, aparecerán aquí por orden de urgencia.</div>`;
+  let last='',open=false;
+  for(const {c,x} of items){
+    const dk=dkey(x.date);
+    if(dk!==last){if(open) h+='</div>';h+=`<div class="sec">${esc(x.day===0?'Hoy':x.day===1?'Mañana':fmtLong(x.date))}</div><div class="rows">`;open=true;last=dk}
+    const hrs=(x.when-now)/36e5,lv=hrs<24?'late':hrs<(c.buffer||2)*24?'warn':'';
+    h+=`<button class="pend" data-c="${esc(c.id)}" data-k="${esc(x.key)}"><span class="bar" style="background:${esc(c.color)}"></span>
+      <span><b>${esc(c.name)}</b><br><span class="plat">${esc(x.format)} · ${PLAT[c.platform]}</span></span>
+      <span style="display:flex;align-items:center;gap:12px"><span class="t ${lv}">${esc(x.time)}</span><span class="check">${I_CHECK}</span></span></button>`;
+  }
+  if(open) h+='</div>';
+  app.innerHTML=h;
+  app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{
+    const c=S.channels.find(x=>x.id===b.dataset.c),u=snap();mark(c,b.dataset.k);undoToast(c.name+' · '+b.dataset.k.split('_')[1]+' marcado',u);render();
+  });
+}
+
+// ---------- ajustes ----------
+function renderSettings(){
+  const H=S.settings.horizon||7;
+  app.innerHTML=`<div class="top"><div class="grow"><h1 class="ph">Ajustes</h1></div></div>
+  <h2 class="sh" style="margin-top:0">Canales</h2>
+  <div class="block">${S.channels.map(c=>`<button class="set-row" data-e="${esc(c.id)}"><span class="bar" style="background:${esc(c.color)}"></span>
+    <span><b>${esc(c.name)}</b><span>${PLAT[c.platform]} · ${freq(c)}</span></span><span class="chev">›</span></button>`).join('')||'<div class="empty">Sin canales</div>'}</div>
+  <button class="btn" id="add">Añadir canal</button>
+  <h2 class="sh">YouTube</h2>
+  <div class="field"><label for="ak">Clave de API para estadísticas</label><input class="inp" id="ak" value="${esc(S.settings.apiKey||'')}" placeholder="AIza…" autocomplete="off"></div>
+  <p class="help">Se guarda solo en este dispositivo. En la pestaña Estadísticas tienes los pasos para crearla.</p>
+  <h2 class="sh">Parrilla</h2>
+  <div class="field"><label for="hz">Días que se ven por delante</label><select class="inp" id="hz">${[5,7,10,14].map(n=>`<option value="${n}" ${n===H?'selected':''}>${n} días</option>`).join('')}</select></div>
+  <h2 class="sh">Copia de seguridad</h2>
+  <p class="help" style="margin-top:-4px">Los datos se guardan solo en este dispositivo. Exporta una copia para pasarlos a otro o para no perderlos.</p>
+  <div class="two"><button class="btn alt" id="exp">Exportar</button><button class="btn alt" id="imp">Importar</button></div>
+  <input type="file" id="file" accept="application/json,.json" hidden>
+  <h2 class="sh">Empezar de cero</h2>
+  <button class="btn alt" id="clr">Desmarcar todo</button>
+  <p class="help" style="margin-top:8px">Quita todas las marcas y deja los huecos otra vez por cubrir. Los canales y horarios no se tocan.</p>
+  <button class="btn del" id="reset">Borrar canales y marcas</button>`;
+  app.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>go('editar-'+b.dataset.e));
+  app.querySelector('#add').onclick=()=>go('nuevo');
+  app.querySelector('#ak').onchange=e=>{S.settings.apiKey=e.target.value.trim();save();toast(S.settings.apiKey?'Clave guardada':'Clave borrada')};
+  app.querySelector('#hz').onchange=e=>{S.settings.horizon=+e.target.value;save();toast('Parrilla de '+e.target.value+' días')};
+  app.querySelector('#exp').onclick=exportData;
+  app.querySelector('#imp').onclick=importSheet;
+  app.querySelector('#clr').onclick=()=>confirmSheet('¿Desmarcar todo?','Todos los huecos vuelven a quedar por cubrir. Los canales y horarios se mantienen.','Desmarcar todo',()=>{const u=snap();S.posts={};save();undoToast('Todo desmarcado',u);go('semana')});
+  app.querySelector('#reset').onclick=()=>confirmSheet('¿Borrar todo?','Se eliminan los canales y todo lo marcado. No se puede deshacer.','Borrar todo',()=>{S=JSON.parse(JSON.stringify(DEFAULT));save();go('')});
+}
+function sheet(html){
+  const bg=document.createElement('div');bg.className='sheet-bg';bg.innerHTML=`<div class="sheet" role="dialog">${html}</div>`;
+  document.body.appendChild(bg);bg.onclick=e=>{if(e.target===bg) bg.remove()};return bg;
+}
+function exportData(){
+  const txt=JSON.stringify(S);
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download='planificador-'+dkey(new Date())+'.json';document.body.appendChild(a);a.click();a.remove()}catch(e){}
+  const bg=sheet(`<h3>Exportar</h3><div class="sub" style="text-transform:none">Si no se ha descargado el archivo, copia este texto y guárdalo en una nota.</div>
+    <textarea class="inp" readonly>${esc(txt)}</textarea><div class="two" style="margin-top:12px"><button class="btn alt" id="cl">Cerrar</button><button class="btn" id="cp">Copiar</button></div>`);
+  bg.querySelector('#cl').onclick=()=>bg.remove();
+  bg.querySelector('#cp').onclick=async()=>{try{await navigator.clipboard.writeText(txt);toast('Copiado')}catch(e){const ta=bg.querySelector('textarea');ta.select();try{document.execCommand('copy');toast('Copiado')}catch(_){toast('Selecciona el texto y cópialo')}}};
+}
+function importSheet(){
+  const bg=sheet(`<h3>Importar</h3><div class="sub" style="text-transform:none">Elige el archivo exportado o pega el texto. Sustituye los datos actuales.</div>
+    <button class="btn alt" id="pf">Elegir archivo</button><textarea class="inp" id="ta" placeholder="O pega aquí el texto" style="margin-top:10px"></textarea>
+    <div class="two" style="margin-top:12px"><button class="btn alt" id="cl">Cancelar</button><button class="btn" id="ok">Importar</button></div>`);
+  const fi=document.getElementById('file');
+  bg.querySelector('#pf').onclick=()=>fi.click();
+  fi.onchange=()=>{const f=fi.files[0];if(f) f.text().then(t=>{bg.querySelector('#ta').value=t;fi.value=''})};
+  bg.querySelector('#cl').onclick=()=>bg.remove();
+  bg.querySelector('#ok').onclick=()=>{try{const d=JSON.parse(bg.querySelector('#ta').value);if(!Array.isArray(d.channels)) throw 0;S=d;load();bg.remove();toast('Datos importados');go('')}catch(e){toast('Ese texto no es una copia válida')}};
+}
+function confirmSheet(t,m,ok,fn){
+  const bg=sheet(`<h3>${esc(t)}</h3><div class="sub" style="text-transform:none">${esc(m)}</div><div class="two"><button class="btn alt" id="cl">Cancelar</button><button class="btn del" id="ok">${esc(ok)}</button></div>`);
+  bg.querySelector('#cl').onclick=()=>bg.remove();bg.querySelector('#ok').onclick=()=>{bg.remove();fn()};
+}
+
+
+// ---------- estadísticas ----------
+const API='https://www.googleapis.com/youtube/v3/';
+const nf=n=>n==null?'—':(n<0?'-':'')+String(Math.abs(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+function short(n){if(n==null) return '—';n=+n;if(n>=1e6) return (n/1e6).toFixed(n>=1e7?1:2).replace('.',',')+' M';if(n>=1e4) return (n/1e3).toFixed(1).replace('.',',')+' K';return nf(n)}
+function ago(iso){const h=(Date.now()-new Date(iso))/36e5;if(h<1) return 'hace '+Math.max(1,Math.round(h*60))+' min';if(h<24) return 'hace '+Math.floor(h)+' h';const d=Math.floor(h/24);return 'hace '+d+(d===1?' día':' días')}
+async function yt(path,params){
+  const u=new URL(API+path);for(const k in params) u.searchParams.set(k,params[k]);u.searchParams.set('key',S.settings.apiKey);
+  const r=await fetch(u);const j=await r.json().catch(()=>({}));
+  if(!r.ok){const m=(j.error&&j.error.message)||('Error '+r.status);throw new Error(/API key not valid|keyInvalid/i.test(m)?'La clave de YouTube no es válida. Revísala en Ajustes.':/quota/i.test(m)?'Se ha agotado el cupo diario de YouTube. Vuelve a probar mañana.':m)}
+  return j;
+}
+async function fetchStats(c){
+  const q=c.ytId?{id:c.ytId}:{forHandle:c.yt};
+  const j=await yt('channels',Object.assign({part:'snippet,statistics,contentDetails'},q));
+  const it=j.items&&j.items[0];if(!it) throw new Error('No encuentro el canal '+(c.yt||'')+' en YouTube. Revisa el usuario en la ficha del canal.');
+  c.ytId=it.id;
+  const st=S.stats[c.id]=S.stats[c.id]||{snaps:[]};
+  st.subs=+it.statistics.subscriberCount;st.views=+it.statistics.viewCount;st.videos=+it.statistics.videoCount;
+  st.hidden=!!it.statistics.hiddenSubscriberCount;st.fetched=Date.now();
+  const up=it.contentDetails&&it.contentDetails.relatedPlaylists&&it.contentDetails.relatedPlaylists.uploads;
+  if(up){
+    const pl=await yt('playlistItems',{part:'contentDetails',playlistId:up,maxResults:'10'});
+    const ids=(pl.items||[]).map(x=>x.contentDetails.videoId).join(',');
+    if(ids){const v=await yt('videos',{part:'snippet,statistics',id:ids});
+      st.recent=(v.items||[]).map(x=>({id:x.id,title:x.snippet.title,pub:x.snippet.publishedAt,views:+(x.statistics.viewCount||0),likes:+(x.statistics.likeCount||0)})).sort((a,b)=>new Date(b.pub)-new Date(a.pub));}
+  }
+  const dk=dkey(new Date());
+  st.snaps=(st.snaps||[]).filter(s=>s.d!==dk).concat({d:dk,subs:st.subs,views:st.views,videos:st.videos}).slice(-120);
+  save();
+}
+function deltaSince(st,days){
+  if(!st||!st.snaps||st.snaps.length<2) return null;
+  const target=dkey(addDays(today(),-days));
+  const prev=[...st.snaps].reverse().find(s=>s.d<=target);
+  if(!prev) return null;
+  return {subs:st.subs-prev.subs,views:st.views-prev.views,from:prev.d};
+}
+function spark(st,color){
+  const s=(st&&st.snaps||[]).slice(-15);
+  if(s.length<3) return '<div class="spark-empty">La gráfica de visitas por día se rellena sola cada día que abras la app.</div>';
+  const pts=[];for(let i=1;i<s.length;i++) pts.push(Math.max(0,s[i].views-s[i-1].views));
+  const mx=Math.max(...pts,1),W=300,Hh=56,step=W/Math.max(pts.length-1,1);
+  const xy=pts.map((v,i)=>[i*step,Hh-4-(v/mx)*(Hh-10)]);
+  const line=xy.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none"><polyline points="0,${Hh} ${line} ${W},${Hh}" fill="${color}" opacity=".12"/><polyline points="${line}" fill="none" stroke="${color}" stroke-width="2.2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+  <div class="spark-cap"><span>Visitas por día · últimos ${pts.length} días</span><span>máx. ${short(mx)}</span></div>`;
+}
+let loading=false,statErr='';
+async function refreshAll(force){
+  if(loading||!S.settings.apiKey) return;
+  const list=S.channels.filter(c=>c.platform==='youtube'&&(c.yt||c.ytId)&&(force||!S.stats[c.id]||!S.stats[c.id].fetched||Date.now()-S.stats[c.id].fetched>30*6e4));
+  if(!list.length) return;
+  loading=true;statErr='';if(route()==='stats') render();
+  for(const c of list){try{await fetchStats(c)}catch(e){statErr=/Failed to fetch|NetworkError|Load failed/i.test(e.message)?'No se pudo conectar con YouTube. Revisa tu conexión. (Desde la vista previa de Claude no funciona: usa la app instalada.)':e.message}}
+  loading=false;if(route()==='stats') render();
+}
+function renderStats(){
+  const yts=S.channels.filter(c=>c.platform==='youtube');
+  const others=S.channels.filter(c=>c.platform!=='youtube');
+  const withData=yts.map(c=>S.stats[c.id]).filter(s=>s&&s.fetched);
+  const totSubs=withData.reduce((a,s)=>a+(s.subs||0),0),totViews=withData.reduce((a,s)=>a+(s.views||0),0);
+  const d7=withData.map(s=>deltaSince(s,7)).filter(Boolean);
+  const last=Math.max(0,...withData.map(s=>s.fetched));
+  let h=`<div class="top"><div class="grow"><div class="date">${last?'Actualizado '+esc(ago(new Date(last).toISOString())):'Canales de YouTube'}</div><h1 class="ph">Estadísticas</h1></div>
+    ${S.settings.apiKey?`<button class="round ${loading?'spin':''}" id="rf" aria-label="Actualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>`:''}</div>`;
+  if(!S.settings.apiKey){
+    h+=`<div class="block pad setup"><h3>Conecta YouTube</h3><p>Para leer las estadísticas, la app necesita una clave gratuita de YouTube. Se crea una vez en unos 5 minutos:</p>
+    <ol><li>Entra en <b>console.cloud.google.com</b> y crea un proyecto (por ejemplo, «Planificador»).</li>
+    <li>En «APIs y servicios» › «Biblioteca», busca <b>YouTube Data API v3</b> y pulsa Habilitar.</li>
+    <li>En «Credenciales», pulsa «Crear credenciales» › «Clave de API» y cópiala.</li>
+    <li>Pégala aquí debajo.</li></ol>
+    <div class="field" style="margin-top:12px"><label for="ak">Clave de API de YouTube</label><input class="inp" id="ak" placeholder="AIza…" autocomplete="off"></div>
+    <button class="btn" id="sk">Guardar clave</button></div>`;
+  } else {
+    if(statErr) h+=`<div class="err">${esc(statErr)}</div>`;
+    if(withData.length) h+=`<div class="totals"><div><b>${short(totSubs)}</b><span>suscriptores en total</span></div><div><b>${short(totViews)}</b><span>visitas en total</span></div>
+      <div><b class="${d7.length?'':'muted'}">${d7.length?'+'+short(d7.reduce((a,d)=>a+d.views,0)):'—'}</b><span>visitas esta semana</span></div></div>`;
+    for(const c of yts){
+      const st=S.stats[c.id];
+      h+=`<div class="sc" style="--c:${esc(c.color)}"><div class="sc-h"><span class="bar" style="background:${esc(c.color)}"></span><b>${esc(c.name)}</b>${c.yt?`<span class="plat">${esc(c.yt)}</span>`:''}</div>`;
+      if(!c.yt&&!c.ytId){h+=`<div class="sc-b"><p class="help" style="margin:0 0 10px">Falta el usuario de YouTube del canal (el que empieza por @).</p><button class="btn alt" data-e="${esc(c.id)}">Añadir usuario</button></div></div>`;continue}
+      if(!st||!st.fetched){h+=`<div class="sc-b"><p class="help" style="margin:0">${loading?'Cargando…':'Sin datos todavía. Pulsa actualizar.'}</p></div></div>`;continue}
+      const d1=deltaSince(st,1),dw=deltaSince(st,7);
+      const dl=(v,lbl)=>v==null?`<span class="dl none">${lbl}: sin datos aún</span>`:`<span class="dl ${v>0?'up':v<0?'down':''}">${v>0?'+':''}${short(v)} ${lbl}</span>`;
+      h+=`<div class="sc-b"><div class="kpis">
+        <div><b>${st.hidden?'Oculto':short(st.subs)}</b><span>suscriptores</span>${dl(dw&&dw.subs,'en 7 d')}</div>
+        <div><b>${short(st.views)}</b><span>visitas</span>${dl(d1&&d1.views,'desde ayer')}</div>
+        <div><b>${nf(st.videos)}</b><span>vídeos</span></div></div>
+        ${spark(st,c.color)}
+        ${st.recent&&st.recent.length?`<div class="vids"><div class="vh">Últimos vídeos</div>${st.recent.slice(0,5).map(v=>`<a class="vid" href="https://youtube.com/shorts/${esc(v.id)}" target="_blank" rel="noopener"><span class="vt">${esc(v.title)}</span><span class="vm">${esc(ago(v.pub))}</span><span class="vv">${short(v.views)}</span></a>`).join('')}</div>`:''}
+      </div></div>`;
+    }
+    if(!yts.length) h+=`<div class="rows empty"><b>Sin canales de YouTube</b>Añade uno en Ajustes para ver sus estadísticas.</div>`;
+  }
+  if(others.length) h+=`<p class="help" style="margin-top:16px">${others.map(c=>esc(c.name)).join(', ')}: las estadísticas de TikTok e Instagram llegarán más adelante.</p>`;
+  h+=`<p class="help" style="margin-top:16px">YouTube redondea los suscriptores públicos (por ejemplo, 5.910 se muestra como 5,91 K). Las visitas sí son exactas.</p>`;
+  app.innerHTML=h;
+  const rf=app.querySelector('#rf');if(rf) rf.onclick=()=>refreshAll(true);
+  const sk=app.querySelector('#sk');if(sk) sk.onclick=()=>{const v=app.querySelector('#ak').value.trim();if(!v) return toast('Pega la clave primero');S.settings.apiKey=v;save();render();refreshAll(true)};
+  app.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>go('editar-'+b.dataset.e));
+}
+
+// ---------- editar ----------
+function renderEdit(id){
+  const orig=id?S.channels.find(x=>x.id===id):null;
+  if(id&&!orig) return go('ajustes');
+  const used=S.channels.map(x=>x.color);
+  const c=orig?JSON.parse(JSON.stringify(orig)):{id:'',name:'',platform:'youtube',color:COLORS.find(k=>!used.includes(k))||COLORS[0],buffer:2,slots:[{id:uid(),format:'Short',days:ALL.slice(),times:['18:00']}]};
+  function draw(){
+    app.innerHTML=`<button class="back" id="bk">‹ ${orig?esc(orig.name):'Ajustes'}</button>
+    <div class="top"><div class="grow"><h1 class="ph">${orig?'Editar canal':'Nuevo canal'}</h1></div></div>
+    <div class="field"><label for="nm">Nombre</label><input class="inp" id="nm" value="${esc(c.name)}" placeholder="Ej.: Animal Chaos"></div>
+    <div class="two"><div class="field"><label for="pl">Plataforma</label><select class="inp" id="pl">${Object.keys(PLAT).map(p=>`<option value="${p}" ${p===c.platform?'selected':''}>${PLAT[p]}</option>`).join('')}</select></div>
+    <div class="field"><label for="bf">Margen mínimo</label><select class="inp" id="bf">${[1,2,3,5,7].map(n=>`<option value="${n}" ${n===c.buffer?'selected':''}>${n} día${n>1?'s':''}</option>`).join('')}</select></div></div>
+    <div class="field" id="ytf" ${c.platform==='youtube'?'':'hidden'}><label for="yh">Usuario de YouTube</label><input class="inp" id="yh" value="${esc(c.yt||'')}" placeholder="@nombredelcanal" autocomplete="off" autocapitalize="off"></div>
+    <p class="help">Por debajo del margen mínimo el canal sale en amarillo; con menos de 24 h, en rojo.</p>
+    <div class="field"><label>Color</label><div class="colors">${COLORS.map(k=>`<button class="sw ${k===c.color?'on':''}" data-col="${k}" style="background:${k}" aria-label="Color ${k}"></button>`).join('')}</div></div>
+    <h2 class="sh">Horario de publicación</h2>
+    ${c.slots.map((r,i)=>`<div class="rule"><div class="rr"><input class="inp" data-fmt="${i}" value="${esc(r.format)}" placeholder="Formato: Short, Largo, Reel…" aria-label="Formato">
+      ${c.slots.length>1?`<button class="x" data-del="${i}" aria-label="Quitar horario">✕</button>`:''}</div>
+      <div class="dows">${DOW.map((l,j)=>`<button class="dow ${r.days.includes(DOWJS[j])?'on':''}" data-dw="${i}:${DOWJS[j]}">${l}</button>`).join('')}</div>
+      <input class="inp" data-tm="${i}" value="${esc(r.times.join(', '))}" placeholder="Horas: 08:00, 14:00" aria-label="Horas" inputmode="text"></div>`).join('')}
+    <button class="btn alt" id="as">Añadir otro formato</button>
+    <div style="height:18px"></div>
+    <button class="btn" id="sv">Guardar canal</button>
+    ${orig?'<button class="btn del" id="dl">Eliminar canal</button>':''}`;
+    const sync=()=>{
+      c.name=app.querySelector('#nm').value;c.platform=app.querySelector('#pl').value;
+      {let y=(app.querySelector('#yh').value||'').trim().replace(/^https?:\/\/(www\.)?youtube\.com\//,'').split(/[/?]/)[0];if(y&&!y.startsWith('@')&&!/^UC[\w-]{20,}$/.test(y)) y='@'+y;if(y!==(c.yt||'')){c.yt=y;delete c.ytId;if(/^UC/.test(y)) c.ytId=y}}c.buffer=+app.querySelector('#bf').value;
+      app.querySelectorAll('[data-fmt]').forEach(el=>c.slots[+el.dataset.fmt].format=el.value);
+      app.querySelectorAll('[data-tm]').forEach(el=>c.slots[+el.dataset.tm].times=parseTimes(el.value));
+    };
+    app.querySelector('#bk').onclick=()=>go(orig?'canal-'+orig.id:'ajustes');
+    app.querySelector('#pl').onchange=e=>{app.querySelector('#ytf').hidden=e.target.value!=='youtube'};
+    app.querySelectorAll('[data-col]').forEach(b=>b.onclick=()=>{sync();c.color=b.dataset.col;draw()});
+    app.querySelectorAll('[data-dw]').forEach(b=>b.onclick=()=>{sync();const [i,d]=b.dataset.dw.split(':').map(Number),r=c.slots[i];r.days=r.days.includes(d)?r.days.filter(x=>x!==d):r.days.concat(d);draw()});
+    app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{sync();c.slots.splice(+b.dataset.del,1);draw()});
+    app.querySelector('#as').onclick=()=>{sync();c.slots.push({id:uid(),format:'Largo',days:[1],times:['20:00']});draw()};
+    app.querySelector('#sv').onclick=()=>{
+      sync();const name=c.name.trim();if(!name) return toast('Ponle un nombre al canal');
+      for(const r of c.slots){r.format=(r.format||'').trim()||'Vídeo';
+        if(!r.times.length) return toast('Escribe al menos una hora en cada horario');
+        if(!r.days.length) return toast('Elige al menos un día en cada horario');}
+      c.name=name;
+      if(!orig){c.id=name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||uid();
+        if(S.channels.some(x=>x.id===c.id)) c.id+='-'+uid().slice(0,3);S.channels.push(c)}
+      else Object.assign(orig,c);
+      save();toast('Canal guardado');go('canal-'+c.id);
+    };
+    const dl=app.querySelector('#dl');
+    if(dl) dl.onclick=()=>confirmSheet('¿Eliminar '+orig.name+'?','Se borran el canal y todo lo marcado en él.','Eliminar canal',()=>{S.channels=S.channels.filter(x=>x!==orig);delete S.posts[orig.id];delete S.stats[orig.id];save();go('ajustes')});
+  }
+  draw();
+}
+function parseTimes(v){
+  return [...new Set(v.split(/[,;\s]+/).map(s=>s.trim()).filter(Boolean).map(s=>{
+    const m=s.match(/^(\d{1,2})(?:[:.h](\d{2}))?h?$/i);if(!m) return null;
+    return pad(Math.min(23,+m[1]))+':'+pad(Math.min(59,+(m[2]||0)))}).filter(Boolean))].sort();
+}
+
+let tt;
+function snap(){return JSON.stringify(S.posts)}
+let ut;
+function undoToast(m,before){
+  document.querySelectorAll('.toast').forEach(x=>x.remove());
+  const d=document.createElement('div');d.className='toast undo';d.innerHTML='<span></span><button>Deshacer</button>';
+  d.querySelector('span').textContent=m;
+  d.querySelector('button').onclick=()=>{S.posts=JSON.parse(before);save();d.remove();clearTimeout(ut);toast('Deshecho');render()};
+  document.body.appendChild(d);clearTimeout(ut);clearTimeout(tt);ut=setTimeout(()=>d.remove(),6000);
+}
+function toast(m){document.querySelectorAll('.toast').forEach(x=>x.remove());const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);clearTimeout(tt);tt=setTimeout(()=>d.remove(),1900)}
+const idle=()=>!document.querySelector('.sheet-bg')&&!route().startsWith('editar')&&route()!=='nuevo';
+load();render();
+setInterval(()=>{if(idle()) render()},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&idle()) render()});
+try{if('serviceWorker' in navigator&&location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+})();
+</script>
+</body>
+</html>
