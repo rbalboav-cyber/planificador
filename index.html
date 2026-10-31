@@ -567,12 +567,13 @@ async function fetchStats(c){
   st.subs=+it.statistics.subscriberCount;st.views=+it.statistics.viewCount;st.videos=+it.statistics.videoCount;
   st.hidden=!!it.statistics.hiddenSubscriberCount;st.fetched=Date.now();
   const up=it.contentDetails&&it.contentDetails.relatedPlaylists&&it.contentDetails.relatedPlaylists.uploads;
-  if(up){
+  st.recent=[];
+  if(up&&st.videos>0) try{
     const pl=await yt('playlistItems',{part:'contentDetails',playlistId:up,maxResults:'10'});
     const ids=(pl.items||[]).map(x=>x.contentDetails.videoId).join(',');
     if(ids){const v=await yt('videos',{part:'snippet,statistics',id:ids});
       st.recent=(v.items||[]).map(x=>({id:x.id,title:x.snippet.title,pub:x.snippet.publishedAt,views:+(x.statistics.viewCount||0),likes:+(x.statistics.likeCount||0)})).sort((a,b)=>new Date(b.pub)-new Date(a.pub));}
-  }
+  }catch(e){st.recent=[]}
   const dk=dkey(new Date());
   st.snaps=(st.snaps||[]).filter(s=>s.d!==dk).concat({d:dk,subs:st.subs,views:st.views,videos:st.videos}).slice(-120);
   save();
@@ -600,7 +601,7 @@ async function refreshAll(force){
   const list=S.channels.filter(c=>c.platform==='youtube'&&(c.yt||c.ytId)&&(force||!S.stats[c.id]||!S.stats[c.id].fetched||Date.now()-S.stats[c.id].fetched>30*6e4));
   if(!list.length) return;
   loading=true;statErr='';if(route()==='stats') render();
-  for(const c of list){try{await fetchStats(c)}catch(e){statErr=/Failed to fetch|NetworkError|Load failed/i.test(e.message)?'No se pudo conectar con YouTube. Revisa tu conexión. (Desde la vista previa de Claude no funciona: usa la app instalada.)':e.message}}
+  for(const c of list){try{await fetchStats(c)}catch(e){statErr=/Failed to fetch|NetworkError|Load failed/i.test(e.message)?'No se pudo conectar con YouTube. Revisa tu conexión. (Desde la vista previa de Claude no funciona: usa la app instalada.)':(/[a-z]{3,} [a-z]{3,} [a-z]{3,}/i.test(e.message)&&!/[áéíóúñ]|No |La |Se /.test(e.message)?'No se pudieron cargar los datos de '+c.name+'. Vuelve a probar en un rato.':e.message)}}
   loading=false;if(route()==='stats') render();
 }
 function renderStats(){
@@ -636,7 +637,7 @@ function renderStats(){
         <div><b>${short(st.views)}</b><span>visitas</span>${dl(d1&&d1.views,'desde ayer')}</div>
         <div><b>${nf(st.videos)}</b><span>vídeos</span></div></div>
         ${spark(st,c.color)}
-        ${st.recent&&st.recent.length?`<div class="vids"><div class="vh">Últimos vídeos</div>${st.recent.slice(0,5).map(v=>`<a class="vid" href="https://youtube.com/shorts/${esc(v.id)}" target="_blank" rel="noopener"><span class="vt">${esc(v.title)}</span><span class="vm">${esc(ago(v.pub))}</span><span class="vv">${short(v.views)}</span></a>`).join('')}</div>`:''}
+        ${!st.videos?'<div class="spark-empty">Este canal aún no tiene vídeos publicados.</div>':''}${st.recent&&st.recent.length?`<div class="vids"><div class="vh">Últimos vídeos</div>${st.recent.slice(0,5).map(v=>`<a class="vid" href="https://youtube.com/shorts/${esc(v.id)}" target="_blank" rel="noopener"><span class="vt">${esc(v.title)}</span><span class="vm">${esc(ago(v.pub))}</span><span class="vv">${short(v.views)}</span></a>`).join('')}</div>`:''}
       </div></div>`;
     }
     if(!yts.length) h+=`<div class="rows empty"><b>Sin canales de YouTube</b>Añade uno en Ajustes para ver sus estadísticas.</div>`;
