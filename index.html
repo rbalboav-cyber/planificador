@@ -63,19 +63,60 @@ h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.02em}
 .g-ch span{overflow:hidden;hyphens:auto;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .g-line{padding:5px 0;border-top:1px solid var(--line)}
 .g-line:first-of-type{border-top:none}
-.g-cell{position:relative;display:flex;gap:2px;height:30px;padding:3px;background:var(--sunk);border-radius:7px}
-.g-cell.none{background:transparent}
-.tick{flex:1;border-radius:3px;min-width:2px}
-.tick.f{background:var(--c)}
-.tick.e{background:transparent;box-shadow:inset 0 0 0 1.5px var(--faint);opacity:.55}
-.tick.p{background:var(--c);opacity:.28}
-.tick.m{background:transparent;box-shadow:inset 0 0 0 1px var(--faint);opacity:.3}
-.nowl{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--now);border-radius:1px;z-index:1}
-.g-foot{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--soft);margin-top:10px;padding-left:2px}
+.g-cell{height:34px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:700;letter-spacing:-.02em}
+.g-cell.na{background:transparent}
+.g-cell.past{background:transparent;color:var(--faint);font-weight:500}
+.g-cell.ok{background:var(--ok);color:#fff;font-size:15px}
+.g-cell.urg{background:var(--late-bg);color:var(--late);box-shadow:inset 0 0 0 1.5px var(--late)}
+.g-cell.soon{background:var(--warn-bg);color:var(--warn);box-shadow:inset 0 0 0 1.5px var(--warn)}
+.g-cell.free{background:var(--sunk);color:var(--soft);box-shadow:inset 0 0 0 1.5px var(--line)}
+.g-head span.today{background:var(--sunk);border-radius:8px;padding:2px 0}
+.g-top{display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px}
+.g-top b{font-size:15px}
+.expand{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;padding:7px 12px;border-radius:999px;background:var(--act);color:var(--act-ink)}
+.expand svg{width:15px;height:15px}
+.g-tap{display:block;width:100%;text-align:left}
+.g-foot{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--soft);margin-top:12px;padding-left:2px}
 .g-foot span{display:inline-flex;align-items:center;gap:6px}
-.k{width:12px;height:12px;border-radius:3px;display:inline-block}
-.k.f{background:var(--soft)} .k.e{box-shadow:inset 0 0 0 1.5px var(--faint)} .k.n{width:2px;background:var(--now)}
+.k{min-width:26px;height:20px;border-radius:5px;display:inline-grid;place-items:center;font-style:normal;font-size:10px;font-weight:700;padding:0 4px}
+.k.ok{background:var(--ok);color:#fff}
+.k.urg{background:var(--late-bg);color:var(--late);box-shadow:inset 0 0 0 1.5px var(--late)}
+.k.soon{background:var(--warn-bg);color:var(--warn);box-shadow:inset 0 0 0 1.5px var(--warn)}
+.k.free{background:var(--sunk);color:var(--soft);box-shadow:inset 0 0 0 1.5px var(--line)}
 
+/* ---------- calendario ---------- */
+.zoom{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+.zoom button{width:44px;height:42px;font-size:22px;font-weight:600}
+.zoom button+button{border-left:1px solid var(--line)}
+.zoom button:disabled{opacity:.3}
+.legend2{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:13px;color:var(--soft);margin:0 2px 12px}
+.legend2 span{display:inline-flex;align-items:center;gap:7px}
+.pill.mini{min-width:22px;height:18px;padding:0;border-radius:5px;font-size:11px;display:inline-grid;place-items:center;font-style:normal}
+.cal{--cw:104px;--chw:96px;--fs:14px;overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);-webkit-overflow-scrolling:touch}
+.cal.z0{--cw:78px;--chw:84px;--fs:12px}
+.cal.z2{--cw:140px;--chw:110px;--fs:16px}
+.cal-in{display:inline-block;min-width:100%}
+.cal-row{display:grid;grid-template-columns:var(--chw) repeat(var(--n),var(--cw));border-top:1px solid var(--line)}
+.cal-row:first-child{border-top:none}
+.cal-ch{position:sticky;left:0;z-index:2;background:var(--panel);display:flex;align-items:flex-start;gap:7px;padding:10px 8px 10px 10px;font-size:13px;font-weight:700;line-height:1.15;text-align:left;border-right:1px solid var(--line);hyphens:auto;overflow-wrap:anywhere}
+.cal-ch i{width:4px;align-self:stretch;border-radius:2px;flex:none}
+.cal-head .cal-ch{background:var(--panel)}
+.cal-day{padding:10px 8px;border-left:1px solid var(--sunk);line-height:1.2}
+.cal-day b{display:block;font-size:var(--fs)}
+.cal-day span{font-size:11px;color:var(--warn);font-weight:600}
+.cal-day span.okt{color:var(--ok)} .cal-day span.mut{color:var(--faint)}
+.cal-day.today{background:var(--sunk)}
+.cal-cell{padding:8px 6px;border-left:1px solid var(--sunk);display:flex;flex-direction:column;gap:5px}
+.cal-free{color:var(--faint);font-size:13px;padding:4px}
+.pill{border-radius:9px;padding:6px 8px 5px;font-size:var(--fs);font-weight:700;text-align:left;line-height:1.1;display:flex;flex-direction:column}
+.pill small{font-size:10.5px;font-weight:600;margin-top:2px;opacity:.85}
+.pill.ok{background:var(--ok);color:#fff}
+.pill.pub{background:var(--sunk);color:var(--faint)}
+.pill.urg{box-shadow:inset 0 0 0 2px var(--late);color:var(--late);background:var(--late-bg)}
+.pill.soon{box-shadow:inset 0 0 0 2px var(--warn);color:var(--warn);background:var(--warn-bg)}
+.pill.free{box-shadow:inset 0 0 0 1.5px var(--faint);color:var(--ink)}
+.pill.miss{box-shadow:inset 0 0 0 1px var(--line);color:var(--faint);opacity:.6;font-size:calc(var(--fs) - 2px);padding:4px 8px}
+.wrap:has(.cal){max-width:1100px}
 /* ---------- lista de margen ---------- */
 .list-h{display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 10px}
 .list-h h2{font-size:19px}
@@ -119,7 +160,7 @@ h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.02em}
 .slots{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
 .slot{border-radius:var(--r-sm);padding:7px 10px 6px;font-size:15px;font-weight:600;display:flex;flex-direction:column;align-items:flex-start;min-width:76px;text-align:left;line-height:1.15;box-shadow:inset 0 0 0 1.5px var(--line);background:transparent}
 .slot small{font-size:11px;font-weight:500;color:var(--soft);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
-.slot.f{background:var(--c);color:#fff;box-shadow:none}
+.slot.f{background:var(--ok);color:#fff;box-shadow:none}
 .slot.f small{color:rgba(255,255,255,.85)}
 .slot.p{background:var(--sunk);box-shadow:none;color:var(--soft)}
 .slot.m{box-shadow:inset 0 0 0 1.5px var(--line);color:var(--faint);border-style:dashed}
@@ -245,6 +286,7 @@ const DOW=['L','M','X','J','V','S','D'], DOWJS=[1,2,3,4,5,6,0], ALL=[0,1,2,3,4,5
 const uid=()=>Math.random().toString(36).slice(2,9);
 const I_CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const I_PLUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const I_EXPAND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
 const I_EDIT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>';
 
 const DEFAULT={version:1,settings:{horizon:7},channels:[
@@ -348,13 +390,14 @@ const app=document.getElementById('app');
 
 function render(){
   const r=route();
-  document.getElementById('tab-home').classList.toggle('on',r===''||r.startsWith('canal-'));
+  document.getElementById('tab-home').classList.toggle('on',r===''||r==='calendario'||r.startsWith('canal-'));
   document.getElementById('tab-week').classList.toggle('on',r==='semana');
   document.getElementById('tab-stats').classList.toggle('on',r==='stats');
   document.getElementById('tab-set').classList.toggle('on',r==='ajustes'||r.startsWith('editar-')||r==='nuevo');
   const late=S.channels.filter(c=>status(c).lvl==='late').length;
   const bd=document.getElementById('badge');bd.hidden=!late;bd.textContent=late;
   if(r.startsWith('canal-')) return renderChannel(r.slice(6));
+  if(r==='calendario') return renderCalendar();
   if(r==='semana') return renderPending();
   if(r==='stats'){renderStats();refreshAll(false);return}
   if(r==='ajustes') return renderSettings();
@@ -378,16 +421,13 @@ function renderHome(){
   else if(warn.length){head=warn.length===1?'A '+warn[0].name+' le queda poco':warn.length+' canales con poco margen'}
   else{hc='ok';head='Todo cubierto'}
 
-  const nowFrac=(now-t0)/864e5;
   let g=`<div class="g-row g-head"><span></span>${Array.from({length:H},(_,i)=>{const d=addDays(t0,i);return `<span class="${i===0?'today':''}">${esc(i===0?'hoy':wd(d))}<b>${d.getDate()}</b></span>`}).join('')}</div>`;
   for(const c of chans){
     const s=sts.get(c);
-    g+=`<div class="g-row g-line" style="--c:${esc(c.color)}"><button class="g-ch" data-ch="${esc(c.id)}"><i style="background:${esc(c.color)}"></i><span>${esc(c.name)}</span></button>`;
+    g+=`<div class="g-row g-line"><button class="g-ch" data-ch="${esc(c.id)}"><i style="background:${esc(c.color)}"></i><span>${esc(c.name)}</span></button>`;
     for(let i=0;i<H;i++){
-      const ds=s.all.filter(x=>x.day===i);
-      g+=`<div class="g-cell ${ds.length?'':'none'}">`+ds.map(x=>{
-        const past=x.when<=now;const k=x.post?(past?'p':'f'):(past?'m':'e');return `<span class="tick ${k}"></span>`}).join('')+
-        (i===0?`<span class="nowl" style="left:calc(${(nowFrac*100).toFixed(1)}% - 1px)"></span>`:'')+`</div>`;
+      const cs=cellState(s.all.filter(x=>x.day===i),now,c);
+      g+=`<div class="g-cell ${cs.k} ${i===0?'td':''}">${esc(cs.t)}</div>`;
     }
     g+=`</div>`;
   }
@@ -406,10 +446,11 @@ function renderHome(){
   app.innerHTML=`<div class="top"><div class="grow"><div class="date">${esc(fmtLong(now))}</div><h1 class="headline ${hc}">${esc(head)}</h1></div>
     <button class="round" id="add" aria-label="Añadir canal">${I_PLUS}</button></div>
     ${plats.length>1?`<div class="filters"><button class="fl ${filter==='all'?'on':''}" data-f="all">Todos</button>${plats.map(p=>`<button class="fl ${filter===p?'on':''}" data-f="${p}">${PLAT[p]}</button>`).join('')}</div>`:''}
-    ${chans.length?`<div class="grid" style="--n:${H}">${g}<div class="g-foot"><span><i class="k f"></i>Programado</span><span><i class="k e"></i>Hueco libre</span><span><i class="k n"></i>Ahora</span></div></div>
+    ${chans.length?`<div class="grid" style="--n:${H}"><div class="g-top"><b>Próximos ${H} días</b><button class="expand" id="cal">${I_EXPAND}Ampliar</button></div><div class="g-tap" id="cal2" role="button" tabindex="0" aria-label="Abrir calendario">${g}</div><div class="g-foot"><span><i class="k ok">✓</i>Todo listo</span><span><i class="k free">1/3</i>Listos de los que tocan</span><span><i class="k urg">0/2</i>Falta en menos de 24 h</span><span><i class="k soon">0/2</i>Falta pronto</span></div></div>
     <div class="list-h"><h2>Margen por canal</h2><span>hasta el próximo hueco</span></div><div class="rows">${rows}</div>`
     :`<div class="rows empty"><b>Sin canales todavía</b>Pulsa + para añadir el primero con su horario.</div>`}`;
   app.querySelector('#add').onclick=()=>go('nuevo');
+  const cb=app.querySelector('#cal');if(cb){cb.onclick=()=>go('calendario');app.querySelector('#cal2').onclick=e=>{if(e.target.closest('.g-ch')) return;go('calendario')}}
   app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()});
   app.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>go('canal-'+b.dataset.ch));
   app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{
@@ -417,6 +458,75 @@ function renderHome(){
     const u=snap();mark(c,s.firstEmpty.key);undoToast(c.name+' · '+hm(s.firstEmpty.when)+' marcado',u);render();
   });
 }
+
+// ---------- calendario ampliado ----------
+function cellState(ds,now,c){
+  if(!ds.length) return {k:'na',t:''};
+  const fut=ds.filter(x=>x.when>now);
+  if(!fut.length) return {k:'past',t:'—'};
+  const ok=fut.filter(x=>x.post).length;
+  if(ok===fut.length) return {k:'ok',t:'✓'};
+  const first=fut.find(x=>!x.post),h=(first.when-now)/36e5;
+  return {k:h<24?'urg':h<((c&&c.buffer)||2)*24?'soon':'free',t:ok+'/'+fut.length};
+}
+function pillState(c,x,now){
+  const past=x.when<=now;
+  if(x.post) return past?'pub':'ok';
+  if(past) return 'miss';
+  const h=(x.when-now)/36e5;
+  return h<24?'urg':h<(c.buffer||2)*24?'soon':'free';
+}
+function renderCalendar(){
+  const H=S.settings.horizon||7,now=new Date(),t0=today();
+  const z=S.settings.calZoom??1;
+  const chans=S.channels.filter(c=>filter==='all'||c.platform===filter);
+  const sts=new Map(chans.map(c=>[c,status(c)]));
+  let head=`<div class="cal-row cal-head"><div class="cal-ch"></div>`;
+  for(let i=0;i<H;i++){
+    const d=addDays(t0,i);let ok=0,tot=0;
+    for(const c of chans) for(const x of sts.get(c).all) if(x.day===i&&x.when>now){tot++;if(x.post) ok++}
+    head+=`<div class="cal-day ${i===0?'today':''}"><b>${esc(i===0?'Hoy':i===1?'Mañana':cap1(wd(d)))} ${d.getDate()}</b><span class="${tot&&ok===tot?'okt':tot?'':'mut'}">${tot?ok+' de '+tot+' listos':'—'}</span></div>`;
+  }
+  head+=`</div>`;
+  let body='';
+  for(const c of chans){
+    const s=sts.get(c),multi=new Set(c.slots.map(r=>r.format)).size>1;
+    body+=`<div class="cal-row"><button class="cal-ch" data-ch="${esc(c.id)}"><i style="background:${esc(c.color)}"></i><span>${esc(c.name)}</span></button>`;
+    for(let i=0;i<H;i++){
+      const ds=s.all.filter(x=>x.day===i);
+      body+=`<div class="cal-cell">`+(ds.length?ds.map(x=>{
+        const k=pillState(c,x,now);
+        const lab=k==='ok'||k==='pub'?'✓ '+x.time:x.time;
+        const sub=multi?x.format:(k==='ok'?'Listo':k==='pub'?'Hecho':k==='miss'?'Sin marcar':'Falta');
+        return `<button class="pill ${k}" data-c="${esc(c.id)}" data-k="${esc(x.key)}">${esc(lab)}${k==='miss'?'':`<small>${esc(sub)}</small>`}</button>`;
+      }).join(''):'<span class="cal-free">—</span>')+`</div>`;
+    }
+    body+=`</div>`;
+  }
+  app.innerHTML=`<button class="back" id="bk">‹ Parrilla</button>
+  <div class="top"><div class="grow"><h1 class="ph">Calendario</h1><div class="date">Toca una hora para marcarla como lista o desmarcarla.</div></div>
+    <div class="zoom"><button id="zo" aria-label="Reducir" ${z<=0?'disabled':''}>−</button><button id="zi" aria-label="Ampliar" ${z>=2?'disabled':''}>+</button></div></div>
+  <div class="legend2">
+    <span><i class="pill ok mini">✓</i>Listo · ya programado</span>
+    <span><i class="pill urg mini"></i>Falta · menos de 24 h</span>
+    <span><i class="pill soon mini"></i>Falta · pronto</span>
+    <span><i class="pill free mini"></i>Falta · con tiempo</span>
+  </div>
+  <div class="cal z${z}" style="--n:${H}"><div class="cal-in">${head}${body}</div></div>`;
+  app.querySelector('#bk').onclick=()=>go('');
+  app.querySelector('#zo').onclick=()=>{S.settings.calZoom=Math.max(0,z-1);save();render()};
+  app.querySelector('#zi').onclick=()=>{S.settings.calZoom=Math.min(2,z+1);save();render()};
+  app.querySelectorAll('.cal-ch[data-ch]').forEach(b=>b.onclick=()=>go('canal-'+b.dataset.ch));
+  const sc=app.querySelector('.cal');if(calScroll) sc.scrollLeft=calScroll;sc.onscroll=()=>{calScroll=sc.scrollLeft};
+  app.querySelectorAll('.pill[data-k]').forEach(b=>b.onclick=()=>{
+    const c=S.channels.find(x=>x.id===b.dataset.c),k=b.dataset.k,u=snap(),t=k.split('_')[1];
+    S.posts[c.id]=S.posts[c.id]||{};
+    if(S.posts[c.id][k]){delete S.posts[c.id][k];save();undoToast(c.name+' · '+t+' desmarcado',u)}
+    else{mark(c,k);undoToast(c.name+' · '+t+' listo',u)}
+    render();
+  });
+}
+let calScroll=0;
 
 // ---------- canal ----------
 function renderChannel(id){
@@ -432,7 +542,7 @@ function renderChannel(id){
       ds.map(x=>{
         const past=x.when<=now;
         const k=x.post?(past?'p':'f'):(past?'m':'');
-        const lbl=x.post?(x.post.title||(past?'Publicado':x.format)):(past?'Sin marcar':x.format);
+        const lbl=x.post?(x.post.title?'✓ '+x.post.title:(past?'✓ Hecho':'✓ Listo')):(past?'Sin marcar':'Falta · '+x.format);
         return `<button class="slot ${k} ${flash===x.key?'pop':''}" data-k="${esc(x.key)}" aria-label="${esc(x.time+' '+x.format)}">${esc(x.time)}<small>${esc(lbl)}</small></button>`;
       }).join('')+`</div></div>`;
   }
@@ -442,7 +552,7 @@ function renderChannel(id){
     <div class="big ${s.lvl}">${esc(s.big)}</div>
     <div class="cap">${s.lvl==='none'?'':'de margen · '}${esc(s.cap)}</div>
     <div class="cap">${PLAT[c.platform]} · ${freq(c)} · ${s.filled} de ${s.fut.length} listos</div></div>
-  <p class="hint">Toca una hora para marcarla como programada. Si ya está marcada, puedes ponerle título o quitarla.</p>
+  <p class="hint"><b style="color:var(--ok)">Verde con ✓</b> = listo (ya programado). <b>Con borde</b> = falta por programar. Toca una hora que falte para marcarla; si ya está lista, puedes ponerle título o quitarla.</p>
   <div class="days" style="--c:${esc(c.color)}">${days||'<div class="empty"><b>Sin horario</b>Edita el canal para añadir días y horas.</div>'}</div>`;
   app.querySelector('#bk').onclick=()=>go('');
   app.querySelector('#ed').onclick=()=>go('editar-'+c.id);
