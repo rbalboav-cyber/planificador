@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#E8EBF0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#151821" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -12,9 +12,6 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
 <title>Planificador de canales</title>
 <style>
 :root{
@@ -264,16 +261,162 @@ nav.tabs .badge{min-width:19px;height:19px;border-radius:10px;background:var(--l
 @keyframes sp{to{transform:rotate(360deg)}}
 nav.tabs button .lb{display:none}
 nav.tabs button.on .lb{display:inline}
+
+/* ================= estilo iOS ================= */
+:root{
+  --bg:#F2F2F7; --panel:#FFFFFF; --sunk:rgba(118,118,128,.12); --line:rgba(60,60,67,.18); --ink:#000; --soft:rgba(60,60,67,.6); --faint:rgba(60,60,67,.3);
+  --ok:#34C759; --warn:#FF9500; --late:#FF3B30; --tint:#007AFF;
+  --ok-bg:rgba(52,199,89,.15); --warn-bg:rgba(255,149,0,.15); --late-bg:rgba(255,59,48,.12); --tint-bg:rgba(0,122,255,.12);
+  --act:#007AFF; --act-ink:#fff; --now:#FF3B30;
+  --r-lg:12px; --r-md:10px; --r-sm:8px;
+  --f:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#000; --panel:#1C1C1E; --sunk:rgba(118,118,128,.24); --line:rgba(84,84,88,.6); --ink:#fff; --soft:rgba(235,235,245,.6); --faint:rgba(235,235,245,.3);
+  --ok:#30D158; --warn:#FF9F0A; --late:#FF453A; --tint:#0A84FF;
+  --ok-bg:rgba(48,209,88,.18); --warn-bg:rgba(255,159,10,.18); --late-bg:rgba(255,69,58,.18); --tint-bg:rgba(10,132,255,.2);
+  --act:#0A84FF; --act-ink:#fff; --now:#FF453A;
+}}
+html,body{font-size:17px;line-height:1.3;letter-spacing:-.01em}
+body{padding-bottom:calc(env(safe-area-inset-bottom) + 70px)}
+h1,h2,h3{letter-spacing:-.02em}
+.wrap{padding:10px 16px 16px}
+.top{margin:4px 0 14px;align-items:center}
+.ph,.headline{font-size:34px;font-weight:700;letter-spacing:-.025em;line-height:1.1;color:var(--ink)}
+.date{font-size:15px;color:var(--soft)}
+.round{width:34px;height:34px;background:var(--sunk);border:none;color:var(--tint)}
+.round svg{width:18px;height:18px}
+.back{color:var(--tint);font-size:17px;margin:4px 0 6px}
+/* aviso de estado */
+.banner{display:flex;gap:12px;align-items:center;background:var(--panel);border-radius:var(--r-lg);padding:12px 14px;margin-bottom:22px}
+.banner .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:#fff;flex:none;font-weight:700;font-size:16px}
+.banner.late .ic{background:var(--late)} .banner.warn .ic{background:var(--warn)} .banner.ok .ic{background:var(--ok)}
+.banner b{display:block;font-size:17px;font-weight:600}
+.banner span{font-size:14px;color:var(--soft)}
+/* secciones tipo Ajustes */
+.list-h,.g-top{margin:0 16px 7px}
+.list-h h2,.sh{font-size:20px;font-weight:700}
+.list-h span{font-size:13px}
+.sh{margin:26px 0 8px 4px}
+.grid,.rows,.block,.days,.sc,.hero,.cal,.totals div{border:none;border-radius:var(--r-lg)}
+.grid{padding:10px 10px 12px;margin-bottom:26px}
+.g-top{margin:2px 4px 10px}
+.g-top b{font-size:17px;font-weight:600}
+.expand{background:none;color:var(--tint);font-weight:400;font-size:17px;padding:0;gap:4px}
+.expand svg{width:16px;height:16px}
+.g-line{border-top:.5px solid var(--line)}
+.g-ch{font-weight:500;font-size:13px}
+.g-ch i{width:8px;height:8px;border-radius:50%;align-self:center}
+.g-head span{color:var(--soft);font-size:11px}
+.g-head span b{font-weight:600;color:var(--ink);font-size:15px}
+.g-head span.today{background:none}
+.g-head span.today b{background:var(--late);color:#fff;border-radius:50%;width:26px;height:26px;display:grid;place-items:center;margin:1px auto 0}
+.g-cell{height:32px;border-radius:7px;font-weight:600;font-size:12px;box-shadow:none!important}
+.g-cell.ok{background:var(--ok-bg);color:var(--ok);font-size:15px}
+.g-cell.urg{background:var(--late-bg);color:var(--late)}
+.g-cell.soon{background:var(--warn-bg);color:var(--warn)}
+.g-cell.free{background:var(--sunk);color:var(--soft)}
+.g-foot{font-size:13px;gap:8px 14px;margin-top:12px}
+.k{box-shadow:none!important;border-radius:5px}
+.k.ok{background:var(--ok-bg);color:var(--ok)} .k.urg{background:var(--late-bg);color:var(--late)} .k.soon{background:var(--warn-bg);color:var(--warn)} .k.free{background:var(--sunk);color:var(--soft)}
+/* filas de lista */
+.ch,.pend,.set-row{border-top:none;position:relative;padding-left:0}
+.ch+.ch::before,.pend+.pend::before,.set-row+.set-row::before,.day+.day::before{content:"";position:absolute;top:0;left:36px;right:0;border-top:.5px solid var(--line)}
+.day{position:relative;border-top:none}
+.ch .bar,.pend .bar,.set-row .bar{width:10px;height:10px;min-height:0;border-radius:50%;margin-left:16px;align-self:center}
+.ch{grid-template-columns:auto 1fr auto;padding:12px 16px 12px 0;gap:12px}
+.ch .nm{font-size:17px;font-weight:600}
+.ch .meta{font-size:14px}
+.margin{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.margin small{font-size:12px}
+.quick{background:var(--tint-bg);color:var(--tint);border:none;font-weight:600;font-size:14px;padding:5px 11px}
+.plat{font-weight:400}
+.filters .fl{border:none;background:var(--sunk);font-size:15px;padding:6px 14px}
+.filters .fl.on{background:var(--tint);color:#fff}
+/* detalle */
+.hero{padding:16px}
+.hero::before{display:none}
+.hero h1{font-size:28px}
+.hero .big{font-size:40px;font-weight:700;letter-spacing:-.03em;margin-top:10px}
+.hint{font-size:14px;margin:0 16px 8px}
+.day{grid-template-columns:78px 1fr;padding:12px 16px}
+.day .dl .all{color:var(--tint);text-decoration:none;font-weight:400;font-size:14px}
+.slot{box-shadow:none;background:var(--sunk);font-weight:600;border-radius:9px}
+.slot.f{background:var(--ok-bg);color:var(--ok)}
+.slot.f small{color:var(--ok)}
+.slot.p{background:transparent;color:var(--faint)}
+.slot.m{background:transparent;box-shadow:inset 0 0 0 1px var(--line);border-style:solid}
+/* por cubrir */
+.pend{padding:11px 16px 11px 0}
+.pend .t{font-size:17px;font-weight:600}
+.pend .t.warn{color:var(--warn)} .pend .t.late{color:var(--late)}
+.check{box-shadow:inset 0 0 0 1.5px var(--faint);width:26px;height:26px;color:transparent}
+.sec{font-size:15px;font-weight:600;color:var(--ink);margin:22px 16px 7px}
+/* calendario */
+.cal{background:var(--panel)}
+.cal-ch{font-weight:500;border-right:.5px solid var(--line);background:var(--panel)}
+.cal-ch i{width:8px;height:8px;border-radius:50%;align-self:flex-start;margin-top:4px}
+.cal-row{border-top:.5px solid var(--line)}
+.cal-day,.cal-cell{border-left:.5px solid var(--line)}
+.cal-day span{color:var(--warn)}
+.cal-day.today{background:var(--tint-bg)}
+.pill{box-shadow:none!important;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.urg{background:var(--late-bg);color:var(--late)}
+.pill.soon{background:var(--warn-bg);color:var(--warn)}
+.pill.free{background:var(--sunk);color:var(--ink)}
+.pill.pub{background:transparent;color:var(--faint)}
+.pill.miss{background:transparent;box-shadow:inset 0 0 0 1px var(--line)!important}
+.zoom{background:var(--sunk);border:none;border-radius:9px}
+.zoom button{width:40px;height:32px;font-size:20px;color:var(--ink)}
+.zoom button+button{border-left:.5px solid var(--line)}
+/* formularios y botones */
+.inp{border:none;background:var(--panel);border-radius:10px;font-size:17px}
+.field label{font-weight:400;font-size:13px;margin-left:16px}
+.help{margin-left:16px;margin-right:16px}
+.btn{border-radius:12px;font-weight:600;font-size:17px;padding:14px;background:var(--tint)}
+.btn.alt{background:var(--panel);color:var(--tint);border:none}
+.btn.del{background:var(--panel);color:var(--late)}
+.rule{border:none}
+.dow{background:var(--sunk);color:var(--ink);font-weight:500}
+.dow.on{background:var(--tint);color:#fff}
+.x{background:var(--sunk);color:var(--late)}
+/* hojas */
+.sheet{background:var(--bg);border-radius:14px 14px 0 0;padding-top:8px}
+.sheet::before{content:"";display:block;width:36px;height:5px;border-radius:3px;background:var(--faint);margin:0 auto 14px}
+.sheet .inp{background:var(--panel)}
+.toast{background:rgba(30,30,30,.92);color:#fff;border-radius:14px;font-weight:500;backdrop-filter:blur(20px)}
+.toast.undo button{background:none;color:#64D2FF;font-weight:600}
+/* estadísticas */
+.totals div{padding:12px}
+.totals b{font-weight:700}
+.kpis b{font-weight:700;font-size:26px}
+.sc-h{padding:14px 16px 0}
+.sc-h .bar{width:10px;height:10px;border-radius:50%}
+.sc-b{padding:12px 16px 14px}
+.err{border-radius:12px}
+/* barra de pestañas */
+nav.tabs{left:0;right:0;transform:none;bottom:0;border-radius:0;padding:6px 0 calc(env(safe-area-inset-bottom) + 4px);gap:0;justify-content:space-around;box-shadow:none;background:rgba(249,249,249,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--line)}
+@media (prefers-color-scheme: dark){nav.tabs{background:rgba(22,22,22,.9)}}
+nav.tabs button{flex:1;flex-direction:column;gap:2px;padding:2px 0;font-size:10px;font-weight:500;color:var(--soft);opacity:1;border-radius:0;position:relative}
+nav.tabs button.on{background:none;color:var(--tint)}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button .lb{display:inline}
+nav.tabs .badge{position:absolute;top:-2px;left:calc(50% + 6px);min-width:17px;height:17px;font-size:11px;padding:0 4px;background:var(--late)}
+.set-row b{color:var(--ink);font-weight:400;font-size:17px}
+.set-row>span:nth-child(2)>span{font-size:14px}
+.slot.m{border:none!important;box-shadow:none!important;background:transparent;color:var(--faint);opacity:1;padding-top:4px;padding-bottom:4px}
+.slot.m small{color:var(--faint)}
 @media (prefers-reduced-motion: reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
 <nav class="tabs" aria-label="Secciones">
-  <button data-go="" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 4v16"/></svg><span class="lb">Parrilla</span></button>
-  <button data-go="semana" id="tab-week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lb">Por cubrir</span><span class="badge" id="badge" hidden></span></button>
+  <button data-go="" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 4v16"/></svg><span class="lb">Canales</span></button>
+  <button data-go="semana" id="tab-week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lb">Pendientes</span><span class="badge" id="badge" hidden></span></button>
   <button data-go="stats" id="tab-stats" aria-label="Estadísticas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="lb">Estadísticas</span></button>
-  <button data-go="ajustes" id="tab-set" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+  <button data-go="ajustes" id="tab-set" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="lb">Ajustes</span></button>
 </nav>
 <script>
 (function(){
@@ -443,8 +586,10 @@ function renderHome(){
       ${s.firstEmpty?`<button class="quick" data-q="${esc(c.id)}">Marcar ${esc(hm(s.firstEmpty.when))}</button>`:''}</div></div>`;
   }
 
-  app.innerHTML=`<div class="top"><div class="grow"><div class="date">${esc(fmtLong(now))}</div><h1 class="headline ${hc}">${esc(head)}</h1></div>
+  const bl=hc||'warn',sub=late.length?'Prográmalos cuanto antes':warn.length?'Les queda menos margen del que quieres':'Todos tus canales tienen vídeos preparados';
+  app.innerHTML=`<div class="top"><div class="grow"><div class="date">${esc(fmtLong(now))}</div><h1 class="ph">Canales</h1></div>
     <button class="round" id="add" aria-label="Añadir canal">${I_PLUS}</button></div>
+    ${S.channels.length?`<div class="banner ${bl}"><span class="ic">${hc==='ok'?'✓':'!'}</span><div><b>${esc(head)}</b><span>${esc(sub)}</span></div></div>`:''}
     ${plats.length>1?`<div class="filters"><button class="fl ${filter==='all'?'on':''}" data-f="all">Todos</button>${plats.map(p=>`<button class="fl ${filter===p?'on':''}" data-f="${p}">${PLAT[p]}</button>`).join('')}</div>`:''}
     ${chans.length?`<div class="grid" style="--n:${H}"><div class="g-top"><b>Próximos ${H} días</b><button class="expand" id="cal">${I_EXPAND}Ampliar</button></div><div class="g-tap" id="cal2" role="button" tabindex="0" aria-label="Abrir calendario">${g}</div><div class="g-foot"><span><i class="k ok">✓</i>Todo listo</span><span><i class="k free">1/3</i>Listos de los que tocan</span><span><i class="k urg">0/2</i>Falta en menos de 24 h</span><span><i class="k soon">0/2</i>Falta pronto</span></div></div>
     <div class="list-h"><h2>Margen por canal</h2><span>hasta el próximo hueco</span></div><div class="rows">${rows}</div>`
@@ -503,7 +648,7 @@ function renderCalendar(){
     }
     body+=`</div>`;
   }
-  app.innerHTML=`<button class="back" id="bk">‹ Parrilla</button>
+  app.innerHTML=`<button class="back" id="bk">‹ Canales</button>
   <div class="top"><div class="grow"><h1 class="ph">Calendario</h1><div class="date">Toca una hora para marcarla como lista o desmarcarla.</div></div>
     <div class="zoom"><button id="zo" aria-label="Reducir" ${z<=0?'disabled':''}>−</button><button id="zi" aria-label="Ampliar" ${z>=2?'disabled':''}>+</button></div></div>
   <div class="legend2">
@@ -547,12 +692,12 @@ function renderChannel(id){
       }).join('')+`</div></div>`;
   }
   flash=null;
-  app.innerHTML=`<button class="back" id="bk">‹ Parrilla</button>
+  app.innerHTML=`<button class="back" id="bk">‹ Canales</button>
   <div class="hero" style="--c:${esc(c.color)}"><div class="row1"><h1>${esc(c.name)}</h1><button class="round" id="ed" aria-label="Editar canal">${I_EDIT}</button></div>
     <div class="big ${s.lvl}">${esc(s.big)}</div>
     <div class="cap">${s.lvl==='none'?'':'de margen · '}${esc(s.cap)}</div>
     <div class="cap">${PLAT[c.platform]} · ${freq(c)} · ${s.filled} de ${s.fut.length} listos</div></div>
-  <p class="hint"><b style="color:var(--ok)">Verde con ✓</b> = listo (ya programado). <b>Con borde</b> = falta por programar. Toca una hora que falte para marcarla; si ya está lista, puedes ponerle título o quitarla.</p>
+  <p class="hint"><b style="color:var(--ok)">Verde ✓</b> = ya programado · <b>Gris</b> = falta. Toca una hora para marcarla; si ya está lista, puedes ponerle título o quitarla.</p>
   <div class="days" style="--c:${esc(c.color)}">${days||'<div class="empty"><b>Sin horario</b>Edita el canal para añadir días y horas.</div>'}</div>`;
   app.querySelector('#bk').onclick=()=>go('');
   app.querySelector('#ed').onclick=()=>go('editar-'+c.id);
@@ -610,7 +755,7 @@ function renderSettings(){
   <h2 class="sh">YouTube</h2>
   <div class="field"><label for="ak">Clave de API para estadísticas</label><input class="inp" id="ak" value="${esc(S.settings.apiKey||'')}" placeholder="AIza…" autocomplete="off"></div>
   <p class="help">Se guarda solo en este dispositivo. En la pestaña Estadísticas tienes los pasos para crearla.</p>
-  <h2 class="sh">Parrilla</h2>
+  <h2 class="sh">Calendario</h2>
   <div class="field"><label for="hz">Días que se ven por delante</label><select class="inp" id="hz">${[5,7,10,14].map(n=>`<option value="${n}" ${n===H?'selected':''}>${n} días</option>`).join('')}</select></div>
   <h2 class="sh">Copia de seguridad</h2>
   <p class="help" style="margin-top:-4px">Los datos se guardan solo en este dispositivo. Exporta una copia para pasarlos a otro o para no perderlos.</p>
